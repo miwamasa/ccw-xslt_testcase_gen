@@ -1,8 +1,8 @@
 
 import subprocess, os, sys
-SAXON = "saxon"
+XSLTPROC = "xsltproc"
 def transform(xslt, src, out):
-    subprocess.run([SAXON, f"-xsl:{xslt}", f"-s:{src}", f"-o:{out}"])
+    subprocess.run([XSLTPROC, "-o", out, xslt, src])
 
 if __name__ == "__main__":
     mode = "correct"
