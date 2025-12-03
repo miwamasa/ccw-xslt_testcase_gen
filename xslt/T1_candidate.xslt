@@ -2,30 +2,57 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" indent="yes"/>
 
-  <!-- Same as T0 - should produce identical results -->
-  <xsl:template match="@*|node()">
-    <xsl:copy>
-      <xsl:apply-templates select="@*|node()"/>
-    </xsl:copy>
+  <!--
+    Candidate transformation: Should match T0_correct.xslt behavior
+    Testing the same complex structural transformation
+  -->
+
+  <xsl:template match="Order">
+    <Invoice>
+      <xsl:attribute name="id">
+        <xsl:value-of select="orderNumber"/>
+      </xsl:attribute>
+
+      <!-- Group customer information -->
+      <CustomerInfo>
+        <Name><xsl:value-of select="customerName"/></Name>
+        <Email><xsl:value-of select="customerEmail"/></Email>
+        <xsl:if test="customerPhone">
+          <Phone><xsl:value-of select="customerPhone"/></Phone>
+        </xsl:if>
+      </CustomerInfo>
+
+      <!-- Transform items -->
+      <Items>
+        <xsl:for-each select="item">
+          <Item>
+            <xsl:attribute name="code">
+              <xsl:value-of select="../itemCode"/>
+            </xsl:attribute>
+            <Description><xsl:value-of select="../itemName"/></Description>
+            <Quantity><xsl:value-of select="../quantity"/></Quantity>
+            <Price currency="USD"><xsl:value-of select="../price"/></Price>
+          </Item>
+        </xsl:for-each>
+      </Items>
+
+      <!-- Shipping information -->
+      <ShippingDetails>
+        <Address>
+          <Street><xsl:value-of select="street"/></Street>
+          <City><xsl:value-of select="city"/></City>
+          <xsl:if test="state">
+            <State><xsl:value-of select="state"/></State>
+          </xsl:if>
+          <PostalCode><xsl:value-of select="zipCode"/></PostalCode>
+          <Country><xsl:value-of select="country"/></Country>
+        </Address>
+        <xsl:if test="deliveryDate">
+          <RequestedDelivery><xsl:value-of select="deliveryDate"/></RequestedDelivery>
+        </xsl:if>
+      </ShippingDetails>
+
+    </Invoice>
   </xsl:template>
 
-  <xsl:template match="Source">
-    <Target>
-      <xsl:apply-templates select="name"/>
-      <xsl:apply-templates select="age"/>
-      <xsl:apply-templates select="city"/>
-    </Target>
-  </xsl:template>
-
-  <xsl:template match="name">
-    <fullName><xsl:value-of select="."/></fullName>
-  </xsl:template>
-
-  <xsl:template match="age">
-    <years><xsl:value-of select="."/></years>
-  </xsl:template>
-
-  <xsl:template match="city">
-    <location><xsl:value-of select="."/></location>
-  </xsl:template>
 </xsl:stylesheet>

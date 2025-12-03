@@ -17,8 +17,17 @@ def generate_xsd(element_names, root="Root"):
     return xsd_header + xsd_body + xsd_footer
 
 if __name__ == "__main__":
+    # Read extracted element names
     with open("../xsd/_extracted_names.txt") as f:
         names = [n.strip() for n in f.readlines()]
-    xsd = generate_xsd(names, root="Source")
+
+    # Read root element name
+    try:
+        with open("../xsd/_root_element.txt") as f:
+            root_name = f.read().strip()
+    except FileNotFoundError:
+        root_name = "Source"  # default fallback
+
+    xsd = generate_xsd(names, root=root_name)
     with open("../xsd/source_mini.xsd", "w") as f:
         f.write(xsd)
