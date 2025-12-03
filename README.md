@@ -7,11 +7,13 @@
 ### 目的
 
 XSLT変換の正しさを検証するために：
-1. **正解XSLT**から使用される要素名を抽出
-2. 抽出した要素からミニXSDスキーマを自動生成
+1. **正解XSLT**から使用される要素名を抽出（ソース・ターゲット両方）
+2. 抽出した要素からミニXSDスキーマを自動生成（source_mini.xsd / target_mini.xsd）
 3. ミニXSDからテスト用XMLを複数生成
 4. 正解XSLTと候補XSLTでそれぞれ変換
 5. 両者の出力を比較して差分を検出
+
+**重要**: このハーネスは、ソースXSDとターゲットXSDの両方を自動生成します。これにより、XSLTジェネレータをテストする際に、両方のスキーマを入力として使用できます。
 
 ## ディレクトリ構造
 
@@ -33,8 +35,12 @@ ccw-xslt_testcase_gen/
 │   ├── T0_correct.xslt         # 正解XSLT（必須）
 │   └── T1_candidate.xslt       # 候補XSLT（必須）
 ├── xsd/                         # 生成されるXSDファイル（自動生成）
-│   ├── _extracted_names.txt    # 抽出された要素名リスト
-│   └── source_mini.xsd         # 生成されたミニXSD
+│   ├── _extracted_names.txt    # 抽出されたソース要素名リスト
+│   ├── _root_element.txt       # ソースルート要素名
+│   ├── _target_names.txt       # 抽出されたターゲット要素名リスト
+│   ├── _target_root_element.txt # ターゲットルート要素名
+│   ├── source_mini.xsd         # 生成されたソースミニXSD
+│   └── target_mini.xsd         # 生成されたターゲットミニXSD
 └── xml/                         # 生成されるXMLファイル（自動生成）
     ├── generated_inputs/        # 生成されたテスト入力XML
     ├── correct_outputs/         # 正解XSLTの出力
@@ -75,6 +81,31 @@ xslt/T0_correct.xslt      # 正解XSLT
 xslt/T1_candidate.xslt    # 候補XSLT（テスト対象）
 ```
 
+**付属のサンプルを使用する場合:**
+
+`xslt/`ディレクトリには以下のサンプルが用意されています：
+
+- **シンプルな変換** (`simple_T0_correct.xslt` / `simple_T1_candidate.xslt`)
+  - フラット構造からフラット構造への変換
+  - 要素名の変更のみ（初学者向け）
+
+- **複雑な変換** (`complex_T0_correct.xslt` / `complex_T1_candidate.xslt`) **← デフォルト**
+  - フラット構造から入れ子構造への変換
+  - グループ化、繰り返し、条件分岐を含む（実践的）
+
+詳細は`xslt/README.md`を参照してください。
+
+サンプルを切り替える場合：
+```bash
+# シンプルな変換を使う
+cp xslt/simple_T0_correct.xslt xslt/T0_correct.xslt
+cp xslt/simple_T1_candidate.xslt xslt/T1_candidate.xslt
+
+# 複雑な変換を使う（デフォルト）
+cp xslt/complex_T0_correct.xslt xslt/T0_correct.xslt
+cp xslt/complex_T1_candidate.xslt xslt/T1_candidate.xslt
+```
+
 #### ステップ2: テストハーネスの実行
 
 ```bash
@@ -84,12 +115,13 @@ python3 run_all.py
 
 これにより、以下の処理が自動的に実行されます：
 
-1. **スキーマ抽出** - `T0_correct.xslt`から要素名を抽出
-2. **XSD生成** - 抽出された要素からミニXSDを生成
-3. **テストXML生成** - ランダムなテストケース（デフォルト5個）を生成
-4. **正解変換** - 正解XSLTでテストXMLを変換
-5. **候補変換** - 候補XSLTでテストXMLを変換
-6. **比較** - 両者の出力を正規化して比較
+1. **スキーマ抽出** - `T0_correct.xslt`からソース・ターゲット要素名を抽出
+2. **ソースXSD生成** - 抽出されたソース要素からミニXSD（source_mini.xsd）を生成
+3. **ターゲットXSD生成** - 抽出されたターゲット要素からミニXSD（target_mini.xsd）を生成
+4. **テストXML生成** - ランダムなテストケース（デフォルト5個）を生成
+5. **正解変換** - 正解XSLTでテストXMLを変換
+6. **候補変換** - 候補XSLTでテストXMLを変換
+7. **比較** - 両者の出力を正規化して比較
 
 #### ステップ3: 結果の確認
 
@@ -118,22 +150,25 @@ input_4.xml OK
 ```bash
 cd scripts
 
-# 1. 要素名抽出
+# 1. 要素名抽出（ソース・ターゲット）
 python3 extract_schema.py
 
-# 2. ミニXSD生成
+# 2. ソースミニXSD生成
 python3 generate_mini_xsd.py
 
-# 3. テストXML生成
+# 3. ターゲットミニXSD生成
+python3 generate_target_xsd.py
+
+# 4. テストXML生成
 python3 generate_xml.py
 
-# 4. 正解XSLTで変換
+# 5. 正解XSLTで変換
 python3 transform.py
 
-# 5. 候補XSLTで変換
+# 6. 候補XSLTで変換
 python3 transform.py --candidate
 
-# 6. 結果比較
+# 7. 結果比較
 python3 compare.py
 ```
 
@@ -254,6 +289,29 @@ pip3 install lxml
 ```
 
 ## 高度な使用方法
+
+### 生成されたXSDの活用
+
+テストハーネスは、正解XSLTから**source_mini.xsd**と**target_mini.xsd**を自動生成します。これらは、XSLT自動生成ツールの入力として使用できます：
+
+```bash
+# 生成されたXSDファイル
+xsd/source_mini.xsd    # ソース構造のスキーマ
+xsd/target_mini.xsd    # ターゲット構造のスキーマ
+
+# XSLTジェネレータへの入力例
+your_xslt_generator \
+  --source xsd/source_mini.xsd \
+  --target xsd/target_mini.xsd \
+  --output generated_candidate.xslt
+
+# 生成されたXSLTをテスト
+cp generated_candidate.xslt xslt/T1_candidate.xslt
+cd scripts
+python3 run_all.py
+```
+
+**注意**: 生成されるXSDは「ミニ」版であり、実際の完全なスキーマではありません。正解XSLTで使用される要素のみが含まれます。
 
 ### 手動でテストXMLを追加
 

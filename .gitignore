@@ -1,7 +1,10 @@
 # Generated files
 xsd/_extracted_names.txt
 xsd/_root_element.txt
+xsd/_target_names.txt
+xsd/_target_root_element.txt
 xsd/source_mini.xsd
+xsd/target_mini.xsd
 xml/generated_inputs/
 xml/correct_outputs/
 xml/candidate_outputs/
