@@ -75,6 +75,31 @@ xslt/T0_correct.xslt      # 正解XSLT
 xslt/T1_candidate.xslt    # 候補XSLT（テスト対象）
 ```
 
+**付属のサンプルを使用する場合:**
+
+`xslt/`ディレクトリには以下のサンプルが用意されています：
+
+- **シンプルな変換** (`simple_T0_correct.xslt` / `simple_T1_candidate.xslt`)
+  - フラット構造からフラット構造への変換
+  - 要素名の変更のみ（初学者向け）
+
+- **複雑な変換** (`complex_T0_correct.xslt` / `complex_T1_candidate.xslt`) **← デフォルト**
+  - フラット構造から入れ子構造への変換
+  - グループ化、繰り返し、条件分岐を含む（実践的）
+
+詳細は`xslt/README.md`を参照してください。
+
+サンプルを切り替える場合：
+```bash
+# シンプルな変換を使う
+cp xslt/simple_T0_correct.xslt xslt/T0_correct.xslt
+cp xslt/simple_T1_candidate.xslt xslt/T1_candidate.xslt
+
+# 複雑な変換を使う（デフォルト）
+cp xslt/complex_T0_correct.xslt xslt/T0_correct.xslt
+cp xslt/complex_T1_candidate.xslt xslt/T1_candidate.xslt
+```
+
 #### ステップ2: テストハーネスの実行
 
 ```bash
